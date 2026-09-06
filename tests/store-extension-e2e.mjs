@@ -14,7 +14,7 @@ try {
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const { server, url } = await startFixtureServer({ port: 0 });
 const launch = {
-  headless: true,
+  headless: process.env.CI ? false : true,
   pipe: true,
   enableExtensions: [root],
   dumpio: Boolean(process.env.CI),
