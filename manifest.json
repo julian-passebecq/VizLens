@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "VizLens Personal Visual Research Browser",
+  "name": "VizLens Visual Research Browser",
   "version": "1.0.0",
-  "description": "Inspect charts and articles, extract grounded data, and plan visuals with your local Gemini companion.",
+  "description": "Inspect charts and article evidence on the current page, export grounded data, and create visual research handoffs.",
   "minimum_chrome_version": "114",
   "permissions": [
     "activeTab",
@@ -33,7 +33,7 @@
     "48": "icons/icon48.png",
     "128": "icons/icon128.png"
   },
-  "host_permissions": [
+  "optional_host_permissions": [
     "http://127.0.0.1/*"
   ]
 }
