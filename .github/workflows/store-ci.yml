@@ -1,0 +1,52 @@
+name: Chrome Web Store CI
+
+on:
+  push:
+    branches: [chrome-web-store-v1]
+  pull_request:
+    branches: [chrome-web-store-v1]
+  workflow_dispatch:
+
+jobs:
+  zero-quota:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm run verify:store
+
+  browser-e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm install --ignore-scripts
+      - name: Install Chrome for Testing
+        run: |
+          npx --yes @puppeteer/browsers install chrome@stable --path "$RUNNER_TEMP/cft"
+          CHROME_BIN=$(find "$RUNNER_TEMP/cft" -type f -path '*/chrome-linux64/chrome' | head -n 1)
+          test -n "$CHROME_BIN"
+          echo "CHROME_BIN=$CHROME_BIN" >> "$GITHUB_ENV"
+      - run: npm run test:e2e:store
+
+  live-gemini-optional:
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Optional two-request Gemini contract
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: |
+          if [ -z "$GEMINI_API_KEY" ]; then
+            echo "GEMINI_API_KEY repository secret is not configured; live Gemini test skipped."
+            exit 0
+          fi
+          npm run test:gemini:live:contract
