@@ -49,7 +49,19 @@ try {
 
   const page = await browser.newPage();
   await page.goto(url, { waitUntil: 'domcontentloaded' });
+  await page.bringToFront();
   await page.triggerExtensionAction(extension);
+
+  let worker = null;
+  for (let i = 0; i < 20 && !worker; i += 1) {
+    const workers = await extension.workers();
+    worker = workers[0] || null;
+    if (!worker) await new Promise((resolve) => setTimeout(resolve, 250));
+  }
+  assert.ok(worker, 'VizLens MV3 service worker must be available.');
+  const activeTab = await worker.evaluate(async () => (await chrome.tabs.query({ active: true, currentWindow: true }))[0] || null);
+  assert.ok(activeTab?.id, 'Toolbar action must expose the activated fixture tab.');
+  const targetTabId = activeTab.id;
 
   const extensionPage = await browser.newPage();
   await extensionPage.goto(`chrome-extension://${extension.id}/sidepanel.html`, { waitUntil: 'domcontentloaded' });
@@ -57,18 +69,15 @@ try {
   const permission = await extensionPage.evaluate(() => chrome.permissions.contains({ origins: ['http://127.0.0.1/*'] }));
   assert.equal(permission, false, 'Localhost permission must not be pre-granted.');
 
-  const scan = await extensionPage.evaluate(async (targetUrl) => {
-    const tabs = await chrome.tabs.query({});
-    const target = tabs.find((tab) => tab.url === targetUrl);
-    if (!target?.id) throw new Error('Fixture tab not found.');
+  const scan = await extensionPage.evaluate(async (tabId) => {
     const module = await import(chrome.runtime.getURL('src/page-scanner.js'));
     const result = await chrome.scripting.executeScript({
-      target: { tabId: target.id },
+      target: { tabId },
       world: 'MAIN',
       func: module.scanPage,
     });
     return result?.[0]?.result || null;
-  }, page.url());
+  }, targetTabId);
 
   assert.ok(scan);
   assert.ok(scan.article?.headline?.includes('Prices, rates and election results'));
