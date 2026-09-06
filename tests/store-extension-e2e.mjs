@@ -13,12 +13,18 @@ try {
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const { server, url } = await startFixtureServer({ port: 0 });
+const launchArgs = [
+  `--disable-extensions-except=${root}`,
+  `--load-extension=${root}`,
+];
+if (process.env.CI) launchArgs.unshift('--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage');
+
 const launch = {
   headless: process.env.CI ? false : true,
   pipe: true,
-  enableExtensions: [root],
+  enableExtensions: true,
   dumpio: Boolean(process.env.CI),
-  args: process.env.CI ? ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'] : [],
+  args: launchArgs,
 };
 if (process.env.CHROME_BIN) launch.executablePath = process.env.CHROME_BIN;
 else launch.channel = process.env.CHROME_CHANNEL || 'chrome';
@@ -33,16 +39,20 @@ try {
 }
 
 try {
-  const extensions = await browser.extensions();
-  const extension = [...extensions.values()].find((item) => item.name === 'VizLens Visual Research Browser');
-  assert.ok(extension, 'Store extension must load.');
+  let extension = null;
+  for (let i = 0; i < 20 && !extension; i += 1) {
+    const extensions = await browser.extensions();
+    extension = [...extensions.values()].find((item) => item.name === 'VizLens Visual Research Browser') || null;
+    if (!extension) await new Promise((resolve) => setTimeout(resolve, 250));
+  }
+  assert.ok(extension, 'Store extension must load in Chrome for Testing.');
 
   const page = await browser.newPage();
   await page.goto(url, { waitUntil: 'domcontentloaded' });
   await page.triggerExtensionAction(extension);
 
   const extensionPage = await browser.newPage();
-  await extensionPage.goto(`chrome-extension://${extension.id}/sidepanel.html`);
+  await extensionPage.goto(`chrome-extension://${extension.id}/sidepanel.html`, { waitUntil: 'domcontentloaded' });
 
   const permission = await extensionPage.evaluate(() => chrome.permissions.contains({ origins: ['http://127.0.0.1/*'] }));
   assert.equal(permission, false, 'Localhost permission must not be pre-granted.');
@@ -50,6 +60,7 @@ try {
   const scan = await extensionPage.evaluate(async (targetUrl) => {
     const tabs = await chrome.tabs.query({});
     const target = tabs.find((tab) => tab.url === targetUrl);
+    if (!target?.id) throw new Error('Fixture tab not found.');
     const module = await import(chrome.runtime.getURL('src/page-scanner.js'));
     const result = await chrome.scripting.executeScript({
       target: { tabId: target.id },
