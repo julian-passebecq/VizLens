@@ -4,7 +4,13 @@ Run these in order. This separates installation problems from extraction problem
 
 ## Test A — release gate, zero quota
 
-From the release folder:
+Double-click:
+
+```text
+verify-vizlens.cmd
+```
+
+or run:
 
 ```powershell
 npm run verify:personal
@@ -12,23 +18,23 @@ npm run verify:personal
 
 **PASS:** command exits normally and reports the core/BBC/proxy/fixture/Gemini-contract checks passed.
 
-If this fails, stop and keep the full terminal output.
+If this fails, keep the full terminal output.
 
-## Test B — local companion health
+## Test B — one-click launcher + companion health
 
-Start:
+Run:
 
 ```powershell
-.\start-vizlens.cmd
+.\run-vizlens.cmd
 ```
 
-Open:
+If a Gemini key is configured, the launcher starts the companion only when needed and opens:
 
 ```text
 http://127.0.0.1:3987/health
 ```
 
-**PASS:** JSON contains:
+**Gemini PASS:** JSON contains:
 
 ```text
 "ok": true
@@ -36,7 +42,7 @@ http://127.0.0.1:3987/health
 "model": "gemini-3.8-flash"
 ```
 
-If `keyConfigured` is false, fix the environment variable before testing Gemini.
+If no key is configured, that is acceptable for Tests C-E: the launcher continues in deterministic scan-only mode.
 
 ## Test C — controlled BBC-like fixture, zero quota
 
@@ -86,7 +92,7 @@ Click **Scan page**.
 
 ## Test F — synthetic live Gemini contract, 2 API requests
 
-Only after Tests A-E pass:
+Only after Tests A-E pass and `/health` reports `keyConfigured: true`:
 
 ```powershell
 npm run test:gemini:live:contract
