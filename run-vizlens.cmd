@@ -26,7 +26,7 @@ echo [OK] Node.js found.
 echo [OK] Gemini key detected in the environment ^(value is not displayed^).
 echo.
 echo Starting the VizLens Gemini companion in a separate terminal...
-start "VizLens Gemini Companion" cmd /k "cd /d "%~dp0" && node server\gemini-proxy.mjs"
+start "VizLens Gemini Companion" cmd /k "cd /d ""%~dp0"" && node server\gemini-proxy.mjs"
 
 timeout /t 2 /nobreak >nul
 
