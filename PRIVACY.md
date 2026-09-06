@@ -1,42 +1,46 @@
-# VizLens Personal v1.0 — privacy / data handling
+# VizLens Chrome Web Store privacy policy — v1.0
 
-VizLens is a personal/unpacked research tool, not a public Chrome Web Store privacy policy.
+Last updated: 2026-09-06
 
-## Stays local by default
+VizLens has one purpose: help you inspect analytical visuals and article evidence on the page you intentionally invoke it on, recover grounded data locally, and create visual-research/export handoffs.
 
-`Scan page` performs deterministic extraction inside Chrome and keeps scan state/exports on your computer.
+## Local page scanning
 
-No Gemini request is made merely because you browse a page or open VizLens.
+VizLens does not continuously monitor browsing. It uses Chrome `activeTab` access only after you invoke the extension on the current page. `Scan page` performs deterministic inspection in the browser and keeps scan state and exports on your device. No page content is sent merely because you browse, open VizLens, or scan a page.
 
-## Leaves the computer only on explicit Gemini actions
+## Optional Gemini features
 
-### Article -> visual
+Before the first Gemini transmission, VizLens shows an in-product AI data disclosure and asks for affirmative consent plus optional permission to contact the localhost companion.
 
-VizLens sends a bounded evidence packet through the localhost companion to Gemini. It can include article headline/description, selected bounded blocks, numeric-fact context, visual metadata and an optional resized annotated viewport screenshot.
+When you explicitly choose **Article -> visual**, **Text -> visual JSON**, or **Analyze viewport**, VizLens may send only the data needed for that request through the local companion on your computer to the Google Gemini API. Depending on the action, this can include bounded article text/evidence, numeric-fact context, visual metadata, a resized/annotated viewport image, or pasted document text.
 
-The current page URL is not included in the Gemini prompt.
+The current page URL is not included in Gemini prompts. The full-resolution screenshot used for local crop export remains local.
 
-### Analyze viewport
+## Parties receiving data
 
-VizLens sends a resized analysis copy of the visible viewport plus bounded page-title metadata.
+For optional Gemini actions, the relevant bounded request data is transmitted to **Google Gemini** using the API key configured by the user in the local VizLens companion. VizLens does not sell user data, use it for advertising, or share it with data brokers.
 
-The full-resolution screenshot used for local crop export remains local.
+## API credentials
 
-## Credential handling
+The Chrome extension does not collect, store, or transmit your Gemini API key. The separate localhost companion reads the key from your operating-system environment and sends it directly to Google over HTTPS as required by the Gemini API. Never put a real API key in extension source files or GitHub.
 
-The browser extension never contains the Gemini key. The Node companion reads it from `GOOGLE_API_KEY` / `GEMINI_API_KEY` in the local process environment.
+## Permissions
 
-## Local companion protections
+- `activeTab`: temporary access to the page only after explicit invocation.
+- `scripting`: runs the deterministic scanner in the active page after invocation.
+- `sidePanel`: provides the VizLens research interface alongside the page.
+- optional `http://127.0.0.1/*`: requested only if you enable Gemini features so the extension can contact your local companion.
 
-- listens on `127.0.0.1`;
-- validates Chrome-extension Origin on AI POSTs;
-- optional exact VizLens extension-origin lock;
-- no wildcard CORS;
-- strict JSON/body-size validation;
-- single active Gemini call per extension origin;
-- browser cancellation propagates upstream;
-- page-defined instructions/tools are not executed.
+VizLens does not request blanket `<all_urls>` browsing permission.
 
-## Diagnostics
+## Retention
 
-`Debug JSON` is intentionally privacy-reduced, but you should still inspect diagnostic files before sharing them. Never share your API key.
+VizLens does not operate a cloud database for page scans. Local extension state is transient unless you explicitly download/export a file. Google Gemini processing/retention is governed by the Google API terms applicable to the Gemini API and the Google project/API key you use.
+
+## Security
+
+The local companion binds to loopback (`127.0.0.1`), validates Chrome-extension origins on AI requests, does not use wildcard CORS, limits request bodies, and communicates with Gemini over HTTPS. Page/document content is treated as untrusted evidence rather than executable instructions.
+
+## Changes
+
+If VizLens introduces materially different user-data practices, the disclosure and this policy will be updated before those practices are enabled.
