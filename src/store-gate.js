@@ -57,16 +57,7 @@ function makeDialog() {
   return dialog;
 }
 
-async function requestPermissionFromGesture() {
-  if (!chrome?.permissions?.request) return true;
-  if (await hasPermission()) return true;
-  return chrome.permissions.request({ origins: [LOCAL_PERMISSION] });
-}
-
 function askForConsent() {
-  if (localStorage.getItem(CONSENT_KEY) === 'accepted') {
-    return hasPermission().then((granted) => granted ? true : false);
-  }
   const dialog = makeDialog();
   const accept = dialog.querySelector('#geminiDisclosureAccept');
   const cancel = dialog.querySelector('#geminiDisclosureCancel');
@@ -81,12 +72,21 @@ function askForConsent() {
       if (dialog.open) dialog.close();
       resolve(value);
     };
-    const onAccept = async () => {
-      try {
-        const granted = await requestPermissionFromGesture();
-        if (granted) localStorage.setItem(CONSENT_KEY, 'accepted');
-        finish(Boolean(granted));
-      } catch { finish(false); }
+    const onAccept = () => {
+      // Chrome requires optional-permission requests to originate from a user
+      // gesture. Call permissions.request directly from this click handler;
+      // do not insert an awaited permission check before it.
+      if (!chrome?.permissions?.request) {
+        localStorage.setItem(CONSENT_KEY, 'accepted');
+        finish(true);
+        return;
+      }
+      chrome.permissions.request({ origins: [LOCAL_PERMISSION] })
+        .then((granted) => {
+          if (granted) localStorage.setItem(CONSENT_KEY, 'accepted');
+          finish(Boolean(granted));
+        })
+        .catch(() => finish(false));
     };
     const onCancel = (event) => { event?.preventDefault?.(); finish(false); };
     accept.addEventListener('click', onAccept);
@@ -111,6 +111,8 @@ export async function storeFetch(input, init = {}) {
   const permitted = await hasPermission();
   if (method === 'GET' && !permitted) return permissionRequiredResponse();
   if (!permitted || localStorage.getItem(CONSENT_KEY) !== 'accepted') {
+    // The disclosure creates a fresh, explicit user gesture for the permission
+    // request even if the user previously revoked localhost access.
     const accepted = await askForConsent();
     if (!accepted) return permissionRequiredResponse();
   }
