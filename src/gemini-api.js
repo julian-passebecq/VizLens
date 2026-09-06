@@ -1,3 +1,4 @@
+import { storeFetch } from './store-gate.js';
 const PROXY_BASE = 'http://127.0.0.1:3987';
 const PROXY_ORIGIN_PATTERN = 'http://127.0.0.1/*';
 
@@ -21,7 +22,7 @@ async function request(path, options = {}) {
   }
   const timeout = setTimeout(() => controller.abort(new DOMException('VizLens Gemini proxy request timed out.', 'TimeoutError')), options.timeoutMs || 90_000);
   try {
-    const response = await fetch(`${PROXY_BASE}${path}`, {
+    const response = await storeFetch(`${PROXY_BASE}${path}`, {
       method: options.method || 'GET',
       headers: options.body ? { 'content-type': 'application/json' } : undefined,
       body: options.body ? JSON.stringify(options.body) : undefined,
