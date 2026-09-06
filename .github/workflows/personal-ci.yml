@@ -1,0 +1,35 @@
+name: Personal Main CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  zero-quota:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm run verify:personal
+
+  browser-e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.12
+      - run: npm install --ignore-scripts
+      - name: Install Puppeteer-matched Chrome for Testing
+        run: |
+          npx --yes @puppeteer/browsers install chrome@152.0.7977.75 --path "$RUNNER_TEMP/cft"
+          CHROME_BIN=$(find "$RUNNER_TEMP/cft" -type f -path '*/chrome-linux64/chrome' | head -n 1)
+          test -n "$CHROME_BIN"
+          echo "CHROME_BIN=$CHROME_BIN" >> "$GITHUB_ENV"
+      - name: Personal real-browser E2E
+        run: xvfb-run -a npm run test:e2e:ci
