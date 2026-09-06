@@ -1,0 +1,13 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>VizLens scanner harness</title>
+<main><article><h1>Quarterly revenue</h1><p>This synthetic article contains one primary analytical figure and explicit bound data for scanner validation.</p><p>The bars represent four categories with values ten, twenty, thirty and forty.</p><figure><svg id="chart" width="500" height="240" aria-label="Revenue ranking"><rect id="a" x="10" y="20" width="100" height="24" fill="#0f6cbd"></rect><rect id="b" x="10" y="60" width="200" height="24" fill="#0f6cbd"></rect><rect id="c" x="10" y="100" width="300" height="24" fill="#0f6cbd"></rect><rect id="d" x="10" y="140" width="400" height="24" fill="#0f6cbd"></rect></svg><figcaption>Revenue ranking by category</figcaption></figure><figure><iframe id="bbc-vj" title="BBC Visual Journalism interactive chart" width="500" height="180" data-src="https://news.files.bbci.co.uk/include/newsspec/test-harness/english/app" srcdoc="<p>Embedded visual test</p>"></iframe><figcaption>Interactive visual journalism explainer</figcaption></figure></article></main>
+<pre id="out">pending</pre>
+<script type="module">
+  import { scanPage } from '../src/page-scanner.js';
+  const rows = [{ id: 'A', value: 10 }, { id: 'B', value: 20 }, { id: 'C', value: 30 }, { id: 'D', value: 40 }];
+  [...document.querySelectorAll('rect')].forEach((node, i) => { node.__data__ = rows[i]; });
+  const result = scanPage();
+  document.querySelector('#out').textContent = JSON.stringify(result);
+  document.documentElement.dataset.done = 'true';
+</script>

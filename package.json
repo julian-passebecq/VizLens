@@ -1,0 +1,31 @@
+{
+  "name": "vizlens-visual-research-browser",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node tests/run.mjs",
+    "test:e2e": "node tests/extension-e2e.mjs",
+    "smoke": "bash tests/browser-smoke.sh",
+    "check": "node --check src/service-worker.js && node --check src/model.js && node --check src/article-facts.js && node --check src/page-scanner.js && node --check src/ai-contract.js && node --check src/gemini-api.js && node --check src/sidepanel.js && node --check server/gemini-core.mjs && node --check server/gemini-proxy.mjs && node tests/run.mjs && node tests/proxy-smoke.mjs && node tests/fixtures-smoke.mjs",
+    "check:browser": "bash tests/browser-smoke.sh",
+    "proxy": "node server/gemini-proxy.mjs",
+    "test:proxy": "node tests/proxy-smoke.mjs",
+    "test:bbc": "node tests/bbc.mjs",
+    "fixtures": "node tests/serve-fixtures.mjs",
+    "test:fixtures": "node tests/fixtures-smoke.mjs",
+    "verify:local": "npm run check && npm run test:bbc && npm run test:gemini:contract",
+    "verify:personal": "npm run verify:local",
+    "start": "node server/gemini-proxy.mjs",
+    "doctor": "node scripts/personal-doctor.mjs",
+    "test:gemini:live": "node tests/gemini-live.mjs",
+    "test:gemini:contract": "node tests/gemini-contract.mjs",
+    "test:gemini:live:json": "node tests/gemini-live-json.mjs",
+    "test:gemini:live:contract": "npm run test:gemini:live && npm run test:gemini:live:json",
+    "first-run": "node scripts/personal-doctor.mjs",
+    "release:verify": "npm run verify:personal"
+  },
+  "devDependencies": {
+    "puppeteer-core": "25.10.0"
+  }
+}

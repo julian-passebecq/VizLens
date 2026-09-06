@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>VizLens</title>
+  <link rel="stylesheet" href="sidepanel.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div>
+      <p class="eyebrow">Visual research browser</p>
+      <h1>VizLens</h1>
+    </div>
+    <div class="top-actions">
+      <button id="scanButton" class="primary">Scan page</button>
+      <button id="viewportButton" class="quiet" title="Uses your local Gemini companion">Analyze viewport</button>
+      <button id="diagnosticsButton" class="quiet">Debug JSON</button>
+    </div>
+  </header>
+
+  <section class="statusbar" aria-live="polite">
+    <span id="status">Scan a web page, or open a PDF/newspaper page and analyze the visible viewport.</span>
+  </section>
+
+  <nav class="tabs" role="tablist" aria-label="VizLens sections">
+    <button id="tab-visuals" class="tab active" role="tab" aria-selected="true" aria-controls="visualsPanel" tabindex="0" data-tab="visuals">Visuals</button>
+    <button id="tab-article" class="tab" role="tab" aria-selected="false" aria-controls="articlePanel" tabindex="-1" data-tab="article">Article</button>
+    <button id="tab-data" class="tab" role="tab" aria-selected="false" aria-controls="dataPanel" tabindex="-1" data-tab="data">Data</button>
+    <button id="tab-source" class="tab" role="tab" aria-selected="false" aria-controls="sourcePanel" tabindex="-1" data-tab="source">Source</button>
+    <button id="tab-ai" class="tab" role="tab" aria-selected="false" aria-controls="aiPanel" tabindex="-1" data-tab="ai">Gemini</button>
+    <button id="tab-vizforge" class="tab" role="tab" aria-selected="false" aria-controls="vizforgePanel" tabindex="-1" data-tab="vizforge">VizForge</button>
+    <button id="tab-powerbi" class="tab" role="tab" aria-selected="false" aria-controls="powerbiPanel" tabindex="-1" data-tab="powerbi">Power BI</button>
+  </nav>
+
+  <main>
+    <section id="visualsPanel" class="panel active" role="tabpanel" aria-labelledby="tab-visuals" aria-hidden="false">
+      <div id="summary" class="summary empty">No scan yet.</div>
+      <div id="visualList" class="visual-list"></div>
+    </section>
+
+    <section id="articlePanel" class="panel" role="tabpanel" aria-labelledby="tab-article" aria-hidden="true">
+      <div id="articleEmpty" class="empty-state">Scan a page to build a compact semantic/article snapshot.</div>
+      <div id="articleContent" hidden>
+        <div class="section-heading">
+          <div><p class="eyebrow">Semantic snapshot</p><h2 id="articleTitle">Article</h2></div>
+          <button id="downloadArticleButton" class="quiet">JSON</button>
+        </div>
+        <div id="articleMeta" class="summary"></div>
+        <div id="articleBlocks" class="article-blocks"></div>
+      </div>
+    </section>
+
+    <section id="dataPanel" class="panel" role="tabpanel" aria-labelledby="tab-data" aria-hidden="true">
+      <div id="dataEmpty" class="empty-state">Select a visual after scanning.</div>
+      <div id="dataContent" hidden>
+        <div class="section-heading">
+          <div><p class="eyebrow">Recovered evidence</p><h2 id="dataTitle">Data</h2></div>
+          <button id="downloadCsvButton" class="quiet">CSV</button>
+        </div>
+        <div id="mappingList" class="mapping-list"></div>
+        <div class="table-wrap"><table id="dataTable"></table></div>
+      </div>
+    </section>
+
+    <section id="sourcePanel" class="panel" role="tabpanel" aria-labelledby="tab-source" aria-hidden="true">
+      <div class="section-heading"><div><p class="eyebrow">Page evidence</p><h2>Source clues</h2></div></div>
+      <div id="sourceContent" class="source-content empty-state">Scan a page to see candidate data and library resources.</div>
+    </section>
+
+    <section id="aiPanel" class="panel" role="tabpanel" aria-labelledby="tab-ai" aria-hidden="true">
+      <div class="section-heading">
+        <div><p class="eyebrow">Gemini API planning</p><h2>Grounded visual agent</h2></div>
+        <button id="aiAnalyzeButton" class="quiet">Article → visual</button>
+      </div>
+      <div id="aiAvailability" class="summary">Checking Gemini API proxy…</div>
+      <div class="callout">
+        <strong>Personal Gemini mode</strong>
+        <p>Gemini actions use your local companion on 127.0.0.1. The API key stays in your environment, page URLs are not sent in prompts, and deterministic scanning remains local.</p>
+      </div>
+      <div class="callout">
+        <strong>PDF / newspaper mode</strong>
+        <p>Open the PDF or scanned page in Chrome and use <b>Analyze viewport</b> to locate the main visual. For exact chart numbers, paste selectable PDF/article text below: VizLens extracts numbers deterministically, Gemini selects fact IDs through function calls, and final output is constrained JSON.</p>
+      </div>
+      <div class="document-input">
+        <label for="documentTextInput"><strong>Article / PDF text → visual JSON</strong></label>
+        <textarea id="documentTextInput" rows="8" placeholder="Paste article text, copied PDF text, OCR text, or report text here…"></textarea>
+        <div class="document-input-actions">
+          <button id="documentTextAnalyzeButton" class="quiet">Text → visual JSON</button>
+          <span>Numbers stay host-owned; the model selects N fact IDs instead of writing values.</span>
+        </div>
+      </div>
+      <div id="aiResultEmpty" class="empty-state">No Gemini result yet. Deterministic extraction remains available when the local proxy or Gemini API is unavailable.</div>
+      <div id="aiResultContent" hidden>
+        <div class="section-heading"><h2>Grounded recipe</h2><button id="downloadAiButton" class="quiet">JSON</button></div>
+        <pre id="aiPreview"></pre>
+        <button id="downloadCropButton" class="quiet wide" hidden>Export detected viewport visual PNG</button>
+      </div>
+    </section>
+
+    <section id="vizforgePanel" class="panel" role="tabpanel" aria-labelledby="tab-vizforge" aria-hidden="true">
+      <div id="vizforgeEmpty" class="empty-state">Select a visual to create a VizForge research brief.</div>
+      <div id="vizforgeContent" hidden>
+        <div class="section-heading">
+          <div><p class="eyebrow">Semantic handoff</p><h2>VizForge research brief</h2></div>
+          <button id="downloadBriefButton" class="quiet">JSON</button>
+        </div>
+        <div id="vizforgeSummary" class="vizforge-summary"></div>
+        <pre id="vizforgePreview"></pre>
+      </div>
+    </section>
+
+    <section id="powerbiPanel" class="panel" role="tabpanel" aria-labelledby="tab-powerbi" aria-hidden="true">
+      <div id="powerbiEmpty" class="empty-state">Select a visual to create a Power BI adapter handoff.</div>
+      <div id="powerbiContent" hidden>
+        <div class="section-heading">
+          <div><p class="eyebrow">Adapter handoff only</p><h2>Power BI draft</h2></div>
+          <button id="downloadPowerBIButton" class="quiet">JSON</button>
+        </div>
+        <div class="callout"><strong>Boundary</strong><p>VizLens suggests data roles. VizForge should own capabilities, DataView mapping, formatting, lifecycle, selection behavior and .pbiviz packaging.</p></div>
+        <pre id="powerbiPreview"></pre>
+      </div>
+    </section>
+  </main>
+
+  <template id="visualCardTemplate">
+    <article class="visual-card">
+      <button class="visual-select">
+        <span class="visual-card-head">
+          <span class="visual-kind"></span>
+          <span class="visual-library"></span>
+        </span>
+        <span class="visual-title-row"><span class="visual-title"></span><span class="primary-badge" hidden>Primary</span></span>
+        <span class="visual-meta"></span>
+      </button>
+      <div class="visual-actions">
+        <button data-action="focus">Focus</button>
+        <button data-action="png">PNG</button>
+        <button data-action="svg">SVG</button>
+        <button data-action="json">JSON</button>
+      </div>
+    </article>
+  </template>
+
+
+  <script type="module" src="src/sidepanel.js"></script>
+</body>
+</html>

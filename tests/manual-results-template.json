@@ -1,0 +1,16 @@
+{
+  "vizlensVersion": "1.0.0",
+  "tester": "",
+  "browser": "",
+  "date": "",
+  "results": [
+    { "siteId": "bbc-inflation-article", "status": "", "primaryVisual": "", "numericFacts": "", "notes": "" },
+    { "siteId": "bbc-bond-yield-chart", "status": "", "primaryVisual": "", "numericFacts": "", "notes": "" },
+    { "siteId": "bbc-climate-guide", "status": "", "primaryVisual": "", "numericFacts": "", "notes": "" },
+    { "siteId": "bbc-election-result", "status": "", "primaryVisual": "", "numericFacts": "", "notes": "" },
+    { "siteId": "bbc-vj-scrolly-test", "status": "", "primaryVisual": "", "numericFacts": "", "notes": "" },
+    { "siteId": "bbc-climate-scrolly", "status": "", "primaryVisual": "", "numericFacts": "", "notes": "" },
+    { "siteId": "observable-d3-line", "status": "", "primaryVisual": "", "numericFacts": "", "notes": "" },
+    { "siteId": "observable-d3-multiline", "status": "", "primaryVisual": "", "numericFacts": "", "notes": "" }
+  ]
+}
