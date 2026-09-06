@@ -1,29 +1,27 @@
 # START HERE — VizLens Personal v1.0
 
-This is the shortest path from ZIP -> working extension -> first test.
+This is the shortest path from repo/ZIP -> working extension -> first test.
 
 ## 0. What you need
 
 - Windows 10/11.
 - Google Chrome 114 or newer.
 - Node.js 20 or newer.
-- A current Gemini API key from Google AI Studio if you want the AI features.
+- A current Gemini API key from Google AI Studio only if you want the AI features.
 
 **Normal deterministic scanning works even if Gemini is not configured.**
 
-## 1. Extract the ZIP
+## 1. Extract or clone VizLens
 
-Extract the whole release to a normal folder, for example:
+Use a normal folder containing `manifest.json`, for example:
 
 ```text
-C:\Tools\vizlens_personal_v1_0\
+C:\Tools\VizLens\
 ```
 
-Do not load the ZIP itself in Chrome. Chrome needs the extracted folder containing `manifest.json`.
+Do not load the ZIP itself in Chrome.
 
-## 2. Create/configure the Gemini key
-
-Create a current key in Google AI Studio. Google now recommends keeping Gemini credentials server-side and treats the key as a secret.
+## 2. Optional: configure the Gemini key
 
 Recommended Windows method:
 
@@ -39,65 +37,60 @@ Recommended Windows method:
 
 Do **not** paste the key into extension source files, `manifest.json`, GitHub, or a ZIP you share.
 
-## 3. Run the first-run check
+## 3. Fastest path: one launcher
 
 Double-click:
 
 ```text
-first-run.cmd
+run-vizlens.cmd
 ```
 
-or in PowerShell:
+or from PowerShell:
 
 ```powershell
-.\first-run.ps1
+.\run-vizlens.cmd
 ```
 
-The check reports:
+The launcher:
 
-- Node version.
-- manifest/package version sync.
-- localhost permission.
-- whether a key variable is present.
-- whether the companion is already running.
+- checks Node.js;
+- detects whether the local Gemini companion is already running;
+- starts it only when needed and a key is configured;
+- continues in deterministic scan-only mode if no key is configured;
+- opens `chrome://extensions/`;
+- opens the health endpoint when the companion is running.
 
-A missing key or an offline companion is informational at this stage; the deterministic extension can still be loaded.
+You can rerun the launcher safely; it will not intentionally start a duplicate companion when the existing health endpoint is reachable.
 
-## 4. Start the local Gemini companion
+## 4. Load VizLens in Chrome — first time only
+
+Use a separate Chrome profile such as **VizLens Dev** if you want development state isolated from your normal browsing profile.
+
+1. Open `chrome://extensions/`.
+2. Enable **Developer mode**.
+3. Click **Load unpacked**.
+4. Select the VizLens folder containing `manifest.json`.
+5. Optionally pin VizLens to the toolbar.
+
+After this first load, normal use is just `run-vizlens.cmd` plus the VizLens toolbar icon.
+
+## 5. Optional zero-quota verification before browsing
 
 Double-click:
 
 ```text
-start-vizlens.cmd
+verify-vizlens.cmd
 ```
 
-Leave that terminal window open while using Gemini features.
+or run:
 
-You should see roughly:
-
-```text
-VizLens Gemini proxy listening on http://127.0.0.1:3987
-Gemini model: gemini-3.8-flash
-API key configured: yes
+```powershell
+npm run verify:personal
 ```
 
-Then open this in Chrome:
+This checks the deterministic scanner, article/data extraction, BBC regression cases, local proxy behavior, fixtures, and Gemini request/structured-output contracts without making a live Gemini request.
 
-```text
-http://127.0.0.1:3987/health
-```
-
-You should get JSON containing `"ok": true` and `"keyConfigured": true`.
-
-## 5. Load VizLens in Chrome
-
-1. Open `chrome://extensions`.
-2. Enable **Developer mode**.
-3. Click **Load unpacked**.
-4. Select the extracted `vizlens_personal_v1_0` folder — the folder containing `manifest.json`.
-5. Optionally pin VizLens to the Chrome toolbar.
-
-Chrome shows an extension ID on this page. You do not need it for basic use.
+The `main` branch also runs these checks automatically in GitHub Actions, plus a real Chrome-for-Testing MV3 integration test.
 
 ## 6. First deterministic test — no Gemini quota
 
@@ -108,7 +101,7 @@ Open a normal article or visualization page.
 3. Click **Scan page**.
 4. Check the **Visuals**, **Article**, **Data**, and **Source** tabs.
 
-If you navigate to a completely different site, click the VizLens toolbar icon again before scanning. This is expected: VizLens uses Chrome's temporary `activeTab` permission instead of permanent `<all_urls>` access.
+If you navigate to a completely different site, click the VizLens toolbar icon again before scanning. This is expected: VizLens uses Chrome's temporary `activeTab` permission instead of permanent blanket web access.
 
 ## 7. First Gemini article test
 
@@ -116,7 +109,7 @@ On a page with an article containing at least two compatible numeric facts:
 
 1. Click **Scan page**.
 2. Open the **Gemini** tab.
-3. Confirm the status says the local Gemini companion is ready.
+3. Confirm the local Gemini companion is ready.
 4. Click **Article -> visual**.
 5. Inspect the grounded JSON.
 
@@ -149,18 +142,10 @@ Set a user environment variable:
 VIZLENS_EXTENSION_ORIGIN=chrome-extension://YOUR_EXTENSION_ID
 ```
 
-Then restart `start-vizlens.cmd`.
+Then restart the companion.
 
-Without this variable, the proxy already accepts POST requests only from `chrome-extension://` origins. The exact-origin setting is an additional personal hardening option.
+Without this variable, the proxy accepts POST requests only from `chrome-extension://` origins. The exact-origin setting is additional personal hardening.
 
-## 10. Run the release regression suite
+## 10. Detailed test checklist
 
-From the VizLens folder:
-
-```powershell
-npm run verify:personal
-```
-
-No Gemini API call is made by this command.
-
-Then follow `FIRST_TEST_CHECKLIST.md` for the controlled fixture test and one real-site test.
+Follow `FIRST_TEST_CHECKLIST.md` for the controlled fixture tests and real-site checks.
