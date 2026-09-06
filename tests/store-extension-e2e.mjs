@@ -13,7 +13,13 @@ try {
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const { server, url } = await startFixtureServer({ port: 0 });
-const launch = { headless: true, pipe: true, enableExtensions: [root] };
+const launch = {
+  headless: true,
+  pipe: true,
+  enableExtensions: [root],
+  dumpio: Boolean(process.env.CI),
+  args: process.env.CI ? ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'] : [],
+};
 if (process.env.CHROME_BIN) launch.executablePath = process.env.CHROME_BIN;
 else launch.channel = process.env.CHROME_CHANNEL || 'chrome';
 
