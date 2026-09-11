@@ -1,3 +1,5 @@
+> Current owner direction (2026-09-11): single Pro AI takeover. Start at [handover/README.md](../handover/README.md). The workflow below is historical; do not restart role rotation.
+
 # VizLens project management
 
 This folder is the working contract between the owner, tech lead, medium developer, and light QA model. Created 2026-09-08 after inspecting the code and existing documentation. Planning and audit are complete for the initial handoff; the sprint implementation has not started.

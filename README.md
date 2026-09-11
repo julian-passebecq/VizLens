@@ -1,3 +1,5 @@
+> Development takeover (2026-09-11): start at [handover/README.md](handover/README.md). Known correctness gaps remain; the historical stable-release wording below is not current release certification.
+
 # VizLens Personal v1.0
 
 **Stable personal/unpacked release for visual research in Chrome.**

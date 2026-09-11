@@ -1,3 +1,5 @@
+> Owner direction, 2026-09-11: the multi-agent workflow is stopped for Pro AI takeover. Read `handover/README.md` first; historical role rotation below is reference, not a requirement to launch agents. Preserve the existing implementation and report outcomes concisely.
+
 # VizLens working agreement
 
 Read `projectmanagement/README.md` and `projectmanagement/STATUS.md` before starting project work. They identify the active sprint and role instructions. Follow the user's current instructions if they change the plan.

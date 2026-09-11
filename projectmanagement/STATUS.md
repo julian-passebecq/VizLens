@@ -1,3 +1,5 @@
+> Updated 2026-09-11: HANDOVER_READY for one Pro AI on `codex/pro-ai-handover-2026-09-11`. Preserved baseline commit: `b691f34`. Read [handover/README.md](../handover/README.md) for current outcomes, tests and recovery audit. Sprint 001 remains unimplemented and unaccepted. The September 8 role/branch instructions below are historical and superseded by the owner takeover request.
+
 # Current project state
 
 Updated: 2026-09-08 by tech lead.
