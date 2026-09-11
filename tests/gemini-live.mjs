@@ -16,7 +16,7 @@ const scan = makeTextScan(
 
 const result = await planArticleWithGemini({ scan, apiKey });
 assert.equal(result.apiRequests, 1, 'Live smoke should use exactly one Gemini API request.');
-assert.ok(result.interactionId, 'Gemini Interactions response must include a top-level interaction ID.');
+assert.ok(result.interactionId == null || typeof result.interactionId === 'string', 'An optional interaction ID must be a string.');
 assert.ok(result.functionCall?.id, 'Gemini function call must include a unique call ID.');
 assert.ok(result.functionCall?.name, 'Gemini must return one VizLens function call.');
 assert.ok(['create_visual_recipe', 'research_only', 'use_existing_visual'].includes(result.functionCall.name));

@@ -43,6 +43,22 @@ assert.equal(planned.functionCall.id, 'fc_contract');
 assert.deepEqual(planned.result.data.map((row) => row.time), [2024,2025]);
 assert.deepEqual(planned.result.data.map((row) => row.timeFactId), ['N2','N4']);
 
+const withoutInteractionId = (fetchImpl) => async (...args) => {
+  const payload = await (await fetchImpl(...args)).json();
+  delete payload.id;
+  return new Response(JSON.stringify(payload), { status: 200 });
+};
+const statelessPlan = await planArticleWithGemini({ scan, apiKey:'contract-test-key', fetchImpl:withoutInteractionId(planFetch) });
+assert.equal(statelessPlan.interactionId, undefined);
+assert.deepEqual(statelessPlan.result.data, planned.result.data);
+assert.equal(statelessPlan.functionCall.id, 'fc_contract');
+await assert.rejects(() => planArticleWithGemini({ scan, apiKey:'contract-test-key', fetchImpl:async (...args) => {
+  const payload = await (await planFetch(...args)).json();
+  delete payload.id;
+  payload.steps[0].arguments.factIds = ['N999', 'N3'];
+  return new Response(JSON.stringify(payload), { status:200 });
+} }), /not included|unknown|not.*prompt/i);
+
 let viewportRequest;
 const viewportFetch = async (_url, options) => {
   viewportRequest = JSON.parse(options.body);
@@ -51,6 +67,9 @@ const viewportFetch = async (_url, options) => {
 };
 const viewportResult = await analyzeViewportWithGemini({ imageDataUrl:'data:image/png;base64,iVBORw0KGgo=', page:{title:'Contract fixture'}, apiKey:'contract-test-key', fetchImpl:viewportFetch });
 assert.equal(viewportResult.interactionId, 'int_contract_viewport');
+const statelessViewport = await analyzeViewportWithGemini({ imageDataUrl:'data:image/png;base64,iVBORw0KGgo=', page:{title:'Contract fixture'}, apiKey:'contract-test-key', fetchImpl:withoutInteractionId(viewportFetch) });
+assert.equal(statelessViewport.interactionId, undefined);
+assert.equal(statelessViewport.hasPrimaryVisual, false);
 assert.equal(viewportRequest.store, false);
 assert.equal(viewportRequest.stream, false);
 assert.equal(viewportRequest.background, false);

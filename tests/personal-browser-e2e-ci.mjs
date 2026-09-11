@@ -14,17 +14,14 @@ assert.ok(manifest.permissions?.includes('sidePanel'));
 assert.ok(manifest.host_permissions?.includes('http://127.0.0.1/*'));
 
 const { server, url } = await startFixtureServer({ port: 0 });
-const args = [
-  `--disable-extensions-except=${root}`,
-  `--load-extension=${root}`,
-];
+const args = [];
 if (process.env.CI) args.unshift('--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage');
 
 const launch = {
   executablePath: process.env.CHROME_BIN,
   headless: process.env.CI ? false : true,
   pipe: true,
-  enableExtensions: true,
+  enableExtensions: [root],
   dumpio: Boolean(process.env.CI),
   args,
 };
@@ -69,6 +66,29 @@ try {
   assert.ok(scan.summary.tableCount >= 1);
   assert.ok(scan.summary.iframeCount >= 1);
   assert.ok(scan.summary.visualCount >= 1);
+
+  // Exercise the actual Scan page handler and rendered tabs on each fixture.
+  const errors = [];
+  panel.on('pageerror', (error) => errors.push(error.message));
+  for (const [fixture, headline] of [
+    ['bbc-like.html', 'Prices, rates and election results'],
+    ['d3-bound.html', 'Quarterly revenue chart'],
+    ['plotly-runtime.html', 'Monthly traffic trend'],
+  ]) {
+    await page.goto(new URL(fixture, url).href, { waitUntil: 'load' });
+    await page.bringToFront();
+    await panel.evaluate(() => document.querySelector('#scanButton').click());
+    await panel.waitForFunction(() => !document.querySelector('#scanButton').disabled, { polling: 100 });
+    assert.match(await panel.$eval('#status', (node) => node.textContent), /visual candidates found/);
+    assert.equal(await panel.$eval('#articleTitle', (node) => node.textContent), headline);
+    assert.ok((await panel.$$('.visual-card')).length >= 1);
+    for (const tab of ['article', 'data', 'source', 'vizforge', 'powerbi']) {
+      await panel.evaluate((name) => document.querySelector(`#tab-${name}`).click(), tab);
+      assert.equal(await panel.$eval(`#tab-${tab}`, (node) => node.getAttribute('aria-selected')), 'true');
+    }
+    console.log(`PASS browser scan and tabs: ${fixture}`);
+  }
+  assert.deepEqual(errors, [], 'The side panel must not throw uncaught errors.');
 
   console.log(`VizLens Personal real-browser CI passed: ${extension.id.slice(0, 8)}...`);
 } finally {

@@ -38,7 +38,7 @@ The active tool list is generated from the exact evidence packet and can contain
 - `tool_choice.allowed_tools.mode:"any"`
 - allowed tool names are a subset of the declared tools
 - interaction status must be `requires_action`
-- top-level interaction `id` required
+- top-level interaction `id` is optional diagnostic metadata (live `store:false` responses can omit it); when present it must be a non-empty string
 - permitted response steps: `thought`, `function_call`
 - every returned `thought` step must have its encrypted `signature`
 - standard custom `function_call` shape is exactly `type`, `id`, `name`, `arguments`

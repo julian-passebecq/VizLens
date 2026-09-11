@@ -243,7 +243,9 @@ function assertAllowedStepTypes(interaction, allowedTypes, purpose) {
 
 function assertUsableInteraction(interaction, purpose) {
   if (!interaction || typeof interaction !== 'object' || Array.isArray(interaction)) throw new Error(`Gemini ${purpose} response was empty or malformed.`);
-  if (typeof interaction.id !== 'string' || !interaction.id.trim()) throw new Error(`Gemini ${purpose} interaction is missing its required interaction ID.`);
+  // Stateless (store:false) responses can omit this diagnostic identifier.
+  // It is not used to validate evidence or execute the selected function.
+  if (interaction.id != null && (typeof interaction.id !== 'string' || !interaction.id.trim())) throw new Error(`Gemini ${purpose} interaction has an invalid interaction ID.`);
   const status = String(interaction.status || '').toLowerCase();
   if (['failed', 'cancelled', 'incomplete'].includes(status)) {
     const detail = (Array.isArray(interaction.errors) ? interaction.errors : []).map((item) => item?.code || item?.message).filter(Boolean).join(', ');

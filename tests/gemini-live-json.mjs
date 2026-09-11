@@ -28,7 +28,7 @@ assert.ok(!request.generation_config.tool_choice);
 assert.equal(request.response_format.mime_type, 'application/json');
 const interaction = await postGemini(request, { apiKey });
 assert.equal(interaction.status, 'completed', 'Structured-output interaction must complete normally.');
-assert.ok(interaction.id, 'Structured-output interaction must include an interaction ID.');
+assert.ok(interaction.id == null || typeof interaction.id === 'string', 'An optional interaction ID must be a string.');
 const text = extractSingleModelText(interaction, 'live structured output');
 const parsed = JSON.parse(text);
 assert.deepEqual(Object.keys(parsed).sort(), ['mode','ok']);

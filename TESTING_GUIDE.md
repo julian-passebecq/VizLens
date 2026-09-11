@@ -13,6 +13,12 @@ VizLens deliberately separates tests into four layers so you can tell what broke
 
 ## 1. Environment check
 
+Normal use requires Node 20+. The optional Puppeteer browser tests require
+Node 22.12+ (Node 24 LTS also works). Install test dependencies with `npm ci`.
+On Windows, set `$env:CHROME_BIN='C:/Program Files/Google/Chrome/Application/chrome.exe'`
+before running `npm run test:e2e:ci`. This test loads the extension and exercises
+the Scan page button and tabs against the BBC-like, D3 and Plotly fixtures.
+
 ```powershell
 npm run doctor
 ```
