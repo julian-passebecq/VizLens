@@ -8,7 +8,7 @@
     "test:e2e": "node tests/extension-e2e.mjs",
     "test:e2e:ci": "node tests/personal-browser-e2e-ci.mjs",
     "smoke": "bash tests/browser-smoke.sh",
-    "check": "node --check src/service-worker.js && node --check src/model.js && node --check src/article-facts.js && node --check src/page-scanner.js && node --check src/ai-contract.js && node --check src/gemini-api.js && node --check src/sidepanel.js && node --check server/gemini-core.mjs && node --check server/gemini-proxy.mjs && node tests/run.mjs && node tests/proxy-smoke.mjs && node tests/fixtures-smoke.mjs",
+    "check": "node --check src/service-worker.js && node --check src/model.js && node --check src/article-facts.js && node --check src/page-scanner.js && node --check src/ai-contract.js && node --check src/gemini-api.js && node --check src/sidepanel.js && node --check src/powerops-model.js && node --check src/powerops.js && node --check server/gemini-core.mjs && node --check server/github-repos.mjs && node --check server/gemini-proxy.mjs && node tests/run.mjs && node tests/power-ops.mjs && node tests/proxy-smoke.mjs && node tests/fixtures-smoke.mjs",
     "check:browser": "bash tests/browser-smoke.sh",
     "proxy": "node server/gemini-proxy.mjs",
     "test:proxy": "node tests/proxy-smoke.mjs",
@@ -24,7 +24,8 @@
     "test:gemini:live:json": "node tests/gemini-live-json.mjs",
     "test:gemini:live:contract": "npm run test:gemini:live && npm run test:gemini:live:json",
     "first-run": "node scripts/personal-doctor.mjs",
-    "release:verify": "npm run verify:personal"
+    "release:verify": "npm run verify:personal",
+    "test:powerops": "node tests/power-ops.mjs"
   },
   "devDependencies": {
     "puppeteer-core": "25.10.0"
