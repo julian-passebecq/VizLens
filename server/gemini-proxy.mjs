@@ -3,6 +3,7 @@ import { randomUUID } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import fs from 'node:fs';
 import { planArticleWithGemini, analyzeViewportWithGemini, DEFAULT_GEMINI_MODEL, API_SCHEMA, GeminiApiError } from './gemini-core.mjs';
+import { listGithubRepositories, githubToken, githubOwner } from './github-repos.mjs';
 
 const HOST = '127.0.0.1';
 const PORT = 3987;
@@ -123,7 +124,7 @@ function publicError(error) {
   };
 }
 
-export function createProxyServer({ key = apiKey(), planner = planArticleWithGemini, viewportAnalyzer = analyzeViewportWithGemini } = {}) {
+export function createProxyServer({ key = apiKey(), planner = planArticleWithGemini, viewportAnalyzer = analyzeViewportWithGemini, repositoryLister = listGithubRepositories } = {}) {
   const activeOrigins = new Set();
   const stats = { requestsAccepted: 0, geminiApiRequests: 0, plans: 0, viewports: 0, successes: 0, failures: 0, aborts: 0, startedAt: new Date().toISOString() };
 
@@ -207,6 +208,11 @@ export function createProxyServer({ key = apiKey(), planner = planArticleWithGem
           },
           proxyStats: { ...stats },
         });
+      }
+      if (req.method === 'GET' && url.pathname === '/api/github/repos') {
+        requireExtensionOrigin(req);
+        const result = await repositoryLister({ token: githubToken(), owner: githubOwner() });
+        return send(req, res, 200, { ok: true, ...result });
       }
       if (req.method === 'POST' && url.pathname === '/api/plan') {
         if (!key) return send(req, res, 503, { ok: false, error: 'GEMINI_API_KEY is not configured on the local proxy.', code: 'KEY_NOT_CONFIGURED', retryable: false, retryAfterMs: null });
