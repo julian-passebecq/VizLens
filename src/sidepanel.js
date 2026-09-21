@@ -573,6 +573,7 @@ async function updateAiAvailability() {
 
 scanButton.addEventListener('click', scan);
 viewportButton.addEventListener('click', analyzeViewport);
+$('#powerOpsButton')?.addEventListener('click', () => chrome.tabs.create({ url: chrome.runtime.getURL('powerops.html') }));
 $('#diagnosticsButton')?.addEventListener('click', exportDiagnostics);
 $('#aiAnalyzeButton').addEventListener('click', analyzeArticle);
 $('#documentTextAnalyzeButton')?.addEventListener('click', analyzeImportedText);
