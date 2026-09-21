@@ -7,7 +7,8 @@ const planner = async ({ signal }) => {
   return { provider:'fixture', apiRequests:1, result:{kind:'research-only',reason:'fixture',evidenceIds:[]} };
 };
 const viewportAnalyzer = async () => ({ hasPrimaryVisual:false,visualType:'none',family:null,title:'',takeaway:'',dataRecoverability:'unknown',bbox:{x:0,y:0,width:0,height:0},reason:'fixture',apiRequests:1 });
-const server = createProxyServer({ key:'test-key', planner, viewportAnalyzer });
+const repositoryLister = async () => ({ owner:'fixture-owner', source:'authenticated', repositories:[{id:'1',name:'fixture-repo',fullName:'fixture-owner/fixture-repo',private:true,htmlUrl:'https://github.com/fixture-owner/fixture-repo',homepage:'',language:'JavaScript',updatedAt:'2026-09-21T00:00:00Z',defaultBranch:'main',topics:[]}] });
+const server = createProxyServer({ key:'test-key', planner, viewportAnalyzer, repositoryLister });
 await new Promise((resolve, reject) => { server.once('error', reject); server.listen(0, '127.0.0.1', resolve); });
 const address = server.address();
 const base = `http://127.0.0.1:${address.port}`;
@@ -23,6 +24,17 @@ try {
   assert.equal(h.geminiContract.viewportAnalysis.mimeType, 'application/json');
   assert.equal(health.headers.get('vary'), 'Origin');
   assert.equal(health.headers.get('access-control-allow-origin'), null);
+
+  const repoForbidden = await fetch(`${base}/api/github/repos`, { headers:{ origin:'https://example.com' } });
+  assert.equal(repoForbidden.status, 403);
+
+  const repos = await fetch(`${base}/api/github/repos`, { headers:{ origin } });
+  assert.equal(repos.status, 200);
+  assert.equal(repos.headers.get('access-control-allow-origin'), origin);
+  const repoBody = await repos.json();
+  assert.equal(repoBody.ok, true);
+  assert.equal(repoBody.source, 'authenticated');
+  assert.equal(repoBody.repositories[0].name, 'fixture-repo');
 
   const forbidden = await fetch(`${base}/api/plan`, { method:'POST', headers:{'content-type':'application/json','origin':'https://example.com'}, body:JSON.stringify({scan:{article:{blocks:[]}}}) });
   assert.equal(forbidden.status, 403);
@@ -50,7 +62,7 @@ try {
   const viewBody = await view.json();
   assert.equal(viewBody.result.visualType, 'none');
   assert.equal(viewBody.proxyStats.geminiApiRequests, 2);
-  console.log('VizLens proxy smoke passed: loopback API, Origin/CORS, JSON/body validation and request accounting.');
+  console.log('VizLens proxy smoke passed: loopback API, GitHub repository route, Origin/CORS, JSON/body validation and request accounting.');
 } finally {
   await new Promise((resolve) => server.close(resolve));
 }
