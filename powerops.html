@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>VizLens Power Ops</title>
+  <link rel="stylesheet" href="powerops.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="brand">
+        <img src="icons/icon48.png" alt="" />
+        <div>
+          <div class="brand-line"><strong>Viz Lens Power Toy</strong><span>Power Ops View</span></div>
+          <small>Your repos. Their context. One launchpad.</small>
+        </div>
+      </div>
+      <div id="familyRibbon" class="family-ribbon" aria-label="Project filters"></div>
+      <div class="top-meta">
+        <button id="refreshButton" class="icon-button" title="Refresh repositories">↻</button>
+        <span id="connectionBadge" class="connection-badge">Connecting…</span>
+      </div>
+    </header>
+
+    <div class="workspace">
+      <aside class="left-panel">
+        <nav class="primary-nav" aria-label="Power Ops sections">
+          <button class="nav-item active" data-view="repositories">▦ <span>All Repositories</span><b id="repoCountBadge">0</b></button>
+          <button class="nav-item" data-view="dashboard">⌂ <span>Dashboard</span></button>
+          <button class="nav-item" data-view="bookmarks">♡ <span>Bookmarks</span><b id="bookmarkCountBadge">0</b></button>
+        </nav>
+        <div class="panel-title">PROJECTS</div>
+        <div id="projectTree" class="project-tree"></div>
+        <div class="left-footer">
+          <button id="settingsButton" class="text-button">⚙ Settings</button>
+          <small>Viz Lens · Power Ops</small>
+        </div>
+      </aside>
+
+      <main class="center-panel">
+        <section id="repositoriesView" class="view active">
+          <div class="search-row">
+            <label class="search-box">
+              <span>⌕</span>
+              <input id="searchInput" type="search" placeholder="Search repositories, tags, descriptions…" />
+              <kbd>Ctrl K</kbd>
+            </label>
+            <select id="languageFilter"><option value="">Language: All</option></select>
+            <select id="visibilityFilter">
+              <option value="">Visibility: All</option>
+              <option value="public">Public</option>
+              <option value="private">Private</option>
+            </select>
+            <select id="sortFilter">
+              <option value="updated-desc">Sort: Last updated</option>
+              <option value="name-asc">Sort: Name A–Z</option>
+              <option value="name-desc">Sort: Name Z–A</option>
+            </select>
+          </div>
+
+          <div class="selection-bar">
+            <label><input id="selectVisibleCheckbox" type="checkbox" /> <b id="selectedCount">0 selected</b></label>
+            <button id="selectAllButton" class="link-button">Select all visible</button>
+            <button id="deselectAllButton" class="link-button">Deselect all</button>
+            <span class="bar-divider"></span>
+            <button id="copyAllButton" class="primary">⧉ Copy all selected URLs</button>
+            <button id="copyGithubButton">⧉ GitHub</button>
+            <button id="copyWebsiteButton">⧉ Websites</button>
+            <button id="copyChatgptButton">⧉ ChatGPT</button>
+            <button id="openSelectedButton">↗ Open selected</button>
+            <button id="saveBookmarkButton">♡ Save list</button>
+          </div>
+
+          <div class="table-wrap">
+            <table class="repo-table">
+              <thead>
+                <tr>
+                  <th class="check-col"></th>
+                  <th>Repository</th>
+                  <th>Group / Tags</th>
+                  <th>Updated</th>
+                  <th>GitHub</th>
+                  <th>Website</th>
+                  <th>ChatGPT</th>
+                  <th class="actions-col"></th>
+                </tr>
+              </thead>
+              <tbody id="repoRows"></tbody>
+            </table>
+          </div>
+
+          <footer class="pager">
+            <span id="resultSummary">Showing 0 repositories</span>
+            <div>
+              <label>Rows <select id="pageSize"><option>25</option><option selected>50</option><option>100</option></select></label>
+              <button id="prevPage">‹</button>
+              <span id="pageLabel">1 / 1</span>
+              <button id="nextPage">›</button>
+            </div>
+          </footer>
+        </section>
+
+        <section id="dashboardView" class="view">
+          <div class="view-header">
+            <div><p class="eyebrow">Overview</p><h1>Repository dashboard</h1><p>Fast summary of your GitHub workspace and saved launch lists.</p></div>
+          </div>
+          <div id="dashboardCards" class="dashboard-cards"></div>
+          <div class="dashboard-grid">
+            <section class="dashboard-block"><div class="block-title"><h2>Project families</h2></div><div id="dashboardFamilies"></div></section>
+            <section class="dashboard-block"><div class="block-title"><h2>Saved lists</h2><button data-open-view="bookmarks">Manage</button></div><div id="dashboardBookmarks"></div></section>
+          </div>
+          <section class="dashboard-block recent-block"><div class="block-title"><h2>Recently updated</h2></div><div id="dashboardRecent"></div></section>
+        </section>
+
+        <section id="bookmarksView" class="view">
+          <div class="view-header">
+            <div><p class="eyebrow">Saved launch sets</p><h1>Bookmarks</h1><p>Save a reusable repository + link selection and reload it in one click.</p></div>
+            <button id="newBookmarkFromCurrent" class="primary">+ Save current selection</button>
+          </div>
+          <div id="bookmarkGrid" class="bookmark-grid"></div>
+        </section>
+      </main>
+
+      <aside class="right-panel">
+        <div class="right-header">
+          <div><span class="right-kicker">BOOKMARKS</span><h2>Saved lists</h2></div>
+          <button id="newBookmarkButton" class="primary small">+ New list</button>
+        </div>
+        <input id="bookmarkSearch" class="bookmark-search" type="search" placeholder="Search bookmarks…" />
+        <div id="bookmarkList" class="bookmark-list"></div>
+        <div id="bookmarkPreview" class="bookmark-preview empty">
+          <p>Select a saved list to preview it.</p>
+        </div>
+        <div class="tip-card"><b>Tip</b><p>A bookmark stores repositories and which GitHub, website, or ChatGPT links are included.</p></div>
+      </aside>
+    </div>
+  </div>
+
+  <dialog id="linkDialog">
+    <form method="dialog" id="linkDialogForm">
+      <div class="dialog-head"><div><p class="eyebrow">Repository links</p><h2 id="linkDialogTitle">Edit links</h2></div><button value="cancel">×</button></div>
+      <label>Website URL<input id="websiteInput" type="url" placeholder="https://…" /></label>
+      <label>ChatGPT URL<input id="chatgptInput" type="url" placeholder="https://chatgpt.com/…" /></label>
+      <div class="dialog-actions"><button value="cancel">Cancel</button><button id="saveLinksButton" value="default" class="primary">Save</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="bookmarkDialog">
+    <form method="dialog" id="bookmarkDialogForm">
+      <div class="dialog-head"><div><p class="eyebrow">Saved list</p><h2>Save current selection</h2></div><button value="cancel">×</button></div>
+      <label>List name<input id="bookmarkNameInput" required maxlength="80" placeholder="e.g. Foil Core" /></label>
+      <p id="bookmarkDialogSummary" class="dialog-copy"></p>
+      <div class="dialog-actions"><button value="cancel">Cancel</button><button id="confirmBookmarkButton" value="default" class="primary">Save list</button></div>
+    </form>
+  </dialog>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script type="module" src="src/powerops.js"></script>
+</body>
+</html>
